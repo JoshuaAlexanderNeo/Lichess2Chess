@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Lichess2Chess",
+  "version": "1.0",
+
+  "description": "Adds Chess.com rating estimate to Lichess ratings.",
+
+  "icons": {
+    "48": "images/icon.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://lichess.org/*"],
+      "js": ["lichess2chess.js"]
+    }
+  ]
+}
