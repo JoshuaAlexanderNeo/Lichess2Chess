@@ -59,8 +59,11 @@ const addChessComRating = (gameType, lichessRatings) => {
   for (rating of lichessRatings) {
     const lichessRating = parseInt(rating.innerText)
     const chessComRating = calculateRegression(regression, lichessRating)
-    console.log('CHESS.COM RATING', chessComRating)
-    rating.innerText += ` (${chessComRating})`
+    let chessComRatingDiv = document.createElement('div')
+    chessComRatingDiv.style.setProperty('color', '#769656')
+    chessComRatingDiv.innerText = `(${chessComRating})`
+    rating.parentNode.appendChild(chessComRatingDiv)
+    rating.parentNode.insertBefore(chessComRatingDiv, rating.nextSibling)
   }
 
   return lichessRatings
