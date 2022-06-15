@@ -8,10 +8,10 @@ const GAME_TYPES = {
 }
 
 // all regressions calculated from chessgoals.com on 15/06/2022
-const BLITZ_REGRESSION = [0.77735, 581.148]
-const BULLET_REGRESSION = [0.819536, 430.42]
-const RAPID_REGRESSION = [0.618176, 943.688]
-const CLASSICAL_REGRESSION = [0.500363, 1086.75]
+const BLITZ_REGRESSION = [0.000169095, 0.665195, -214.973]
+const BULLET_REGRESSION = [-6.0463e-8, 0.000302882, 0.787848, -418.114]
+const RAPID_REGRESSION = [1.25804, -795.231]
+const CLASSICAL_REGRESSION = [0.00033735, 0.267304, -79.3846]
 
 // Finds out whether the game is blitz/bullet/rapid or classical
 const findGameType = () => {
@@ -48,9 +48,20 @@ const getLichessRatingsFromProfile = () => {
   return ratings
 }
 
-// linear regression
+// Calculates the chess.com rating based on the regression
 const calculateRegression = (regression, lichessRating) => {
-  return Math.round((lichessRating - regression[1]) / regression[0])
+  if (regression.length === 2) {
+    return Math.round(regression[0] * lichessRating + regression[1])
+  } else if (regression.length === 3) {
+    return Math.round(regression[0] * (lichessRating * lichessRating) + regression[1] * lichessRating + regression[2])
+  } else {
+    return Math.round(
+      regression[0] * (lichessRating * lichessRating * lichessRating) +
+        regression[1] * (lichessRating * lichessRating) +
+        regression[2] * lichessRating +
+        regression[3]
+    )
+  }
 }
 
 // Adds ratings to the left-most sidebar.
