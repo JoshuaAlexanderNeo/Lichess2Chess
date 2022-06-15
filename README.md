@@ -1,7 +1,14 @@
 # Lichess2Chess
-Browser extension to convert Lichess ratings to Chess.com ratings.
+This is a browser extension to convert Lichess ratings to Chess.com ratings.
 
 Does regressions from data from https://chessgoals.com/rating-comparison/ for each main chess category (Classical, Blitz, Rapid, and Bullet) and displays your equivalent Chess.com rating in Green beside your Lichess.org rating.
+
+## Get the extension
+### Firefox
+https://addons.mozilla.org/en-US/firefox/addon/lichess2chess/
+
+### Chrome:
+Coming soon...
 
 ## Examples
 ### See estimated ratings in game
