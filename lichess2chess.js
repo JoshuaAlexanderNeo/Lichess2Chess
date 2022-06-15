@@ -82,9 +82,9 @@ const addChessComRatingToProfile = (lichessRatings) => {
     if (regression && rating.innerText[0] !== '?') {
       const lichessRating = parseInt(rating.textContent)
       const chessComRating = calculateRegression(regression, lichessRating)
-      let chessComRatingDiv = document.createElement('div')
+      let chessComRatingDiv = document.createElement('span')
       chessComRatingDiv.style.setProperty('color', '#769656')
-      chessComRatingDiv.innerText = `(${chessComRating})`
+      chessComRatingDiv.innerText = ` (${chessComRating})`
       rating.firstChild.appendChild(chessComRatingDiv)
     }
   }
