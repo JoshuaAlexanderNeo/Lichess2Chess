@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Lichess2Chess",
-  "version": "1.0",
+  "version": "1.1",
 
   "description": "Adds Chess.com rating estimate to Lichess.org.",
 
