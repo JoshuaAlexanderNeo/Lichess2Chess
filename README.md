@@ -5,10 +5,10 @@ Does regressions from data from https://chessgoals.com/rating-comparison/ for ea
 
 ## Example 
 
-![image](https://user-images.githubusercontent.com/89805167/173694048-1ee28f6e-cb49-44b6-97ad-a4fc8d4cd3f8.png)
+![image](https://user-images.githubusercontent.com/89805167/173908513-320acd98-41df-426c-a070-b5bf22275ac9.png)
 
 
-![Webp net-resizeimage](https://user-images.githubusercontent.com/89805167/173839053-0fb6089e-1ca1-4062-9999-ee11e2d3b970.png)
+![image](https://user-images.githubusercontent.com/89805167/173908318-4b44f32f-e9e9-48c4-8a60-baa46adf4ed3.png)
 
 
 ## Regressions
