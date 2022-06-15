@@ -8,7 +8,7 @@ Does regressions from data from https://chessgoals.com/rating-comparison/ for ea
 ![image](https://user-images.githubusercontent.com/89805167/173908513-320acd98-41df-426c-a070-b5bf22275ac9.png)
 
 
-![image](https://user-images.githubusercontent.com/89805167/173908318-4b44f32f-e9e9-48c4-8a60-baa46adf4ed3.png)
+![image](https://user-images.githubusercontent.com/89805167/173908954-7d8363dc-d263-4faf-87ae-ff860db16dc9.png)
 
 
 ## Regressions
