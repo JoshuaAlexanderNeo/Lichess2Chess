@@ -8,7 +8,7 @@ Does regressions from data from https://chessgoals.com/rating-comparison/ for ea
 https://addons.mozilla.org/en-US/firefox/addon/lichess2chess/
 
 ### Chrome:
-Coming soon...
+https://chrome.google.com/webstore/detail/lichess2chess/mdjhjmefckhheleoegfcobijefkpfppo
 
 ## Examples
 ### See estimated ratings in game
