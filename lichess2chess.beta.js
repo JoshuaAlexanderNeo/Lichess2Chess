@@ -1,24 +1,3 @@
-// distinguish different modes using href
-// it solves the issue between different ui language in this way
-const findGameType = (href) => {
-	const pathname = new URL(href, document.baseURI).pathname;
-	const gameType = pathname.split("/perf/")[1];
-	switch (gameType) {
-		case "blitz":
-			return GAME_TYPES.BLITZ;
-		case "bullet":
-			return GAME_TYPES.BULLET;
-		case "rapid":
-			return GAME_TYPES.RAPID;
-		case "classical":
-			return GAME_TYPES.CLASSICAL;
-		case "correspondence":
-			return GAME_TYPES.CORRESPONDENCE;
-		default:
-			return GAME_TYPES.UNKNOWN;
-	}
-};
-
 const GAME_TYPES = {
 	BLITZ: "blitz",
 	BULLET: "bullet",
@@ -40,6 +19,43 @@ const RAPID_REGRESSION = [1.22020143441711, -704.691460754459];
 const CLASSICAL_REGRESSION = [
 	-0.000396331712598891, 3.03452012559305, -2662.167846144,
 ];
+
+    browser.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+      if (changeInfo.status == "complete") {
+        findGameType(tabId);
+      }
+    });
+
+// distinguish between different modes using href
+// it solves the issue that happens when you use other languages
+const findGameType = (href) => {
+	      browser.tabs.executeScript(tabId, {
+        code: `
+          const gameTypeElements = document.querySelectorAll("a[href*='/perf/']");
+          const gameType = Array.from(gameTypeElements).map((element) => element.
+  text())[0];
+          return gameType;
+        `,
+        runAt: "document_end"
+      }, (gameType) => {
+        console.log(`Game type: ${gameType}`);
+	const pathname = new URL(href, document.baseURI).pathname;
+	const gameType = pathname.split("/perf/")[1];
+	switch (gameType) {
+		case "blitz":
+			return GAME_TYPES.BLITZ;
+		case "bullet":
+			return GAME_TYPES.BULLET;
+		case "rapid":
+			return GAME_TYPES.RAPID;
+		case "classical":
+			return GAME_TYPES.CLASSICAL;
+		case "correspondence":
+			return GAME_TYPES.CORRESPONDENCE;
+		default:
+			return GAME_TYPES.UNKNOWN;
+	}
+};
 
 // fetches the user's lichess rating
 const getLichessRatingsFromGame = () => {
