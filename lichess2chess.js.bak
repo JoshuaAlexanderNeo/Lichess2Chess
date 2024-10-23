@@ -1,10 +1,31 @@
+// distinguish different modes using href
+// it solves the issue between different ui language in this way
+const findGameType = (href) => {
+	const pathname = new URL(href, document.baseURI).pathname;
+	const gameType = pathname.split("/perf/")[1];
+	switch (gameType) {
+		case "blitz":
+			return GAME_TYPES.BLITZ;
+		case "bullet":
+			return GAME_TYPES.BULLET;
+		case "rapid":
+			return GAME_TYPES.RAPID;
+		case "classical":
+			return GAME_TYPES.CLASSICAL;
+		case "correspondence":
+			return GAME_TYPES.CORRESPONDENCE;
+		default:
+			return GAME_TYPES.UNKNOWN;
+	}
+};
+
 const GAME_TYPES = {
-	BLITZ: "Blitz",
-	BULLET: "Bullet",
-	RAPID: "Rapid",
-	CLASSICAL: "Classical",
-	CORRESPONDENCE: "Correspondence",
-	UNKNOWN: "Unknown",
+	BLITZ: "blitz",
+	BULLET: "bullet",
+	RAPID: "rapid",
+	CLASSICAL: "classical",
+	CORRESPONDENCE: "correspondence",
+	UNKNOWN: "unknown",
 };
 
 // all regressions calculated from chessgoals.com on 2024/10/23
@@ -19,30 +40,6 @@ const RAPID_REGRESSION = [1.22020143441711, -704.691460754459];
 const CLASSICAL_REGRESSION = [
 	-0.000396331712598891, 3.03452012559305, -2662.167846144,
 ];
-
-// Finds out whether the game is blitz/bullet/rapid or classical
-const findGameType = () => {
-	let type = document.querySelector(".setup");
-
-	if (type !== null) {
-		type = type.lastChild;
-	} else {
-		return GAME_TYPES.UNKNOWN;
-	}
-	if (type?.title && type.outerText.includes(GAME_TYPES.CORRESPONDENCE)) {
-		return GAME_TYPES.CORRESPONDENCE;
-	} else if (type?.title && type.outerText.includes(GAME_TYPES.BLITZ)) {
-		return GAME_TYPES.BLITZ;
-	} else if (type?.title && type.outerText.includes(GAME_TYPES.BULLET)) {
-		return GAME_TYPES.BULLET;
-	} else if (type?.title && type.outerText.includes(GAME_TYPES.RAPID)) {
-		return GAME_TYPES.RAPID;
-	} else if (type?.title && type.outerText.includes(GAME_TYPES.CLASSICAL)) {
-		return GAME_TYPES.CLASSICAL;
-	} else {
-		return GAME_TYPES.UNKNOWN;
-	}
-};
 
 // fetches the user's lichess rating
 const getLichessRatingsFromGame = () => {
@@ -79,7 +76,7 @@ const calculateRegression = (regression, lichessRating) => {
 const addChessComRatingToProfile = (lichessRatings) => {
 	for (rating of lichessRatings) {
 		console.log(rating);
-		const gameType = rating.previousElementSibling.innerHTML;
+		const gameType = rating.closest("a").dataset.mode;
 		let regression;
 		switch (gameType) {
 			case GAME_TYPES.BLITZ:
@@ -106,7 +103,6 @@ const addChessComRatingToProfile = (lichessRatings) => {
 		}
 	}
 };
-
 // Adds the chess.com rating equivalent beside the lichess rating.
 const addChessComRatingToGame = (gameType, lichessRatings) => {
 	let regression;

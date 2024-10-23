@@ -1,0 +1,145 @@
+this is the css
+
+<div class="side sub-ratings"><a data-icon="" title="極快速模式：低於3分鐘" href="/@/olivertzeng/perf/bullet"><span><h3>Bullet</h3><rating><strong>1333</strong><bad class="rp">7</bad><span>查看所有555盤棋</span></rating><span class="rank" title="評分每 15 分鐘更新一次">排名：217,
+573</span></span><i data-icon=""></i></a><a data-icon="" title="快速模式：3到8分鐘" class="active" href="/@/olivertzeng/perf/blitz"><span><h3>Blitz</h3><rating><strong>990</strong><good class="rp">33</good><span>查看所有158盤棋</span></rating><span class="rank" title="評分每 15 分鐘更新一次">排名：543,
+752</span></span><i data-icon=""></i></a><a data-icon="" title="一般模式：8到25分鐘" href="/@/olivertzeng/perf/rapid"><span><h3>快速模式</h3><rating><strong>1194</strong><good class="rp">6</good><span>查看所有303盤棋</span></rating><span class="rank" title="評分每 15 分鐘更新一次">排名：226,
+426</span></span><i data-icon=""></i></a><a data-icon="" title="經典模式：25分鐘以上" href="/@/olivertzeng/perf/classical"><span><h3>經典</h3><rating><strong>970?</strong><span>查看所有10盤棋</span></rating></span><i data-icon=""></i></a><a data-icon="" title="通信模式：一天或好幾天一步" href="/@/olivertzeng/perf/correspondence"><span><h3>通信棋局</h3><rating><strong>?</strong><span>查看所有1盤棋</span></rating></span><i data-icon=""></i></a><a data-icon="" title="LiChess Tools - Puzzle Stats" href="/@/olivertzeng/perf/puzzle" class="lichessTools-profilePuzzleTab"><span><h3>謎題</h3><rating><strong>1532</strong><span>906個題目</span></rating></span><i data-icon=""></i></a><hr><a data-icon="" title="西洋棋戰術教練" href="/training/dashboard/30?u=olivertzeng"><span><h3>謎題</h3><rating><strong>1532</strong><span>906個題目</span></rating></span><i data-icon=""></i></a><a data-icon="" href="/storm/dashboard/olivertzeng"><span><h3>Puzzle Storm</h3><rating><strong>19</strong><span>148輪</span></rating></span><i data-icon=""></i></a><a data-icon="" href="/racer"><span><h3>Puzzle Racer</h3><rating><strong>30</strong><span>61輪</span></rating></span><i data-icon=""></i></a><a data-icon="" href="/streak"><span><h3>Puzzle Streak</h3><rating><strong>24</strong><span>198輪</span></rating></span><i data-icon=""></i></a></div>
+
+this is a js
+
+const modes = document.querySelectorAll(".side.sub-ratings a");
+
+// distinguish different modes using href
+// it solves the issue between different ui language in this way
+modes.forEach((mode) => {
+	const href = mode.getAttribute("href");
+	const url = new URL(href, document.baseURI);
+	const pathname = url.pathname;
+	const gameType = pathname.split("/perf/")[1];
+	if (gameType) {
+		console.log(gameType);
+	}
+});
+
+const GAME_TYPES = {
+	BLITZ: "blitz",
+	BULLET: "bullet",
+	RAPID: "rapid",
+	CLASSICAL: "classical",
+	CORRESPONDENCE: "correspondence",
+	UNKNOWN: "unknown",
+};
+
+// all regressions calculated from chessgoals.com on 2024/10/23
+// via LibreOffice Calc
+const BLITZ_REGRESSION = [
+	6.25193101330584e-5, 1.08025630325128, -610.648011142447,
+];
+const BULLET_REGRESSION = [
+	-6.8967721737e-8, 0.0004109690384, 0.4185993473529, -140.94630702249,
+];
+const RAPID_REGRESSION = [1.22020143441711, -704.691460754459];
+const CLASSICAL_REGRESSION = [
+	-0.000396331712598891, 3.03452012559305, -2662.167846144,
+];
+
+// fetches the user's lichess rating
+const getLichessRatingsFromGame = () => {
+	const rating = document.querySelectorAll(".ruser > rating");
+	return rating;
+};
+
+const getLichessRatingsFromProfile = () => {
+	const ratings = document.querySelectorAll(".sub-ratings rating");
+	return ratings;
+};
+
+// Calculates the chess.com rating based on the regression
+const calculateRegression = (regression, lichessRating) => {
+	if (regression.length === 2) {
+		return Math.round(regression[0] * lichessRating + regression[1]);
+	} else if (regression.length === 3) {
+		return Math.round(
+			regression[0] * (lichessRating * lichessRating) +
+				regression[1] * lichessRating +
+				regression[2],
+		);
+	} else {
+		return Math.round(
+			regression[0] * (lichessRating * lichessRating * lichessRating) +
+				regression[1] * (lichessRating * lichessRating) +
+				regression[2] * lichessRating +
+				regression[3],
+		);
+	}
+};
+
+// Adds ratings to the left-most sidebar.
+const addChessComRatingToProfile = (lichessRatings) => {
+	for (rating of lichessRatings) {
+		console.log(rating);
+		let regression;
+		if (rating.previousElementSibling.innerHTML === GAME_TYPES.BULLET) {
+			regression = BULLET_REGRESSION;
+		} else if (rating.previousElementSibling.innerHTML === GAME_TYPES.BLITZ) {
+			regression = BLITZ_REGRESSION;
+		} else if (rating.previousElementSibling.innerHTML === GAME_TYPES.RAPID) {
+			regression = RAPID_REGRESSION;
+		} else if (
+			rating.previousElementSibling.innerHTML === GAME_TYPES.CLASSICAL
+		) {
+			regression = CLASSICAL_REGRESSION;
+		}
+
+		if (
+			typeof lichessRating === "number" &&
+			Number.isFinite(lichessRating) &&
+			regression
+		) {
+			const lichessRating = parseInt(rating.textContent);
+			const chessComRating = calculateRegression(regression, lichessRating);
+			let chessComRatingDiv = document.createElement("span");
+			chessComRatingDiv.style.setProperty("color", "#769656");
+			chessComRatingDiv.innerText = ` (${chessComRating})`;
+			rating.firstChild.appendChild(chessComRatingDiv);
+		}
+	}
+};
+
+// Adds the chess.com rating equivalent beside the lichess rating.
+const addChessComRatingToGame = (gameType, lichessRatings) => {
+	let regression;
+
+	if (gameType === GAME_TYPES.BLITZ) {
+		regression = BLITZ_REGRESSION;
+	} else if (gameType === GAME_TYPES.BULLET) {
+		regression = BULLET_REGRESSION;
+	} else if (gameType === GAME_TYPES.RAPID) {
+		regression = RAPID_REGRESSION;
+	} else {
+		regression = CLASSICAL_REGRESSION;
+	}
+
+	for (rating of lichessRatings) {
+		const lichessRating = parseInt(rating.innerText);
+		const chessComRating = calculateRegression(regression, lichessRating);
+		let chessComRatingDiv = document.createElement("div");
+		chessComRatingDiv.style.setProperty("color", "#769656");
+		chessComRatingDiv.innerText = `(${chessComRating})`;
+		rating.parentNode.appendChild(chessComRatingDiv);
+		rating.parentNode.insertBefore(chessComRatingDiv, rating.nextSibling);
+	}
+
+	return lichessRatings;
+};
+
+if (gameType === GAME_TYPES.UNKNOWN) {
+	// check if on a profile
+	const profileRatings = getLichessRatingsFromProfile();
+	addChessComRatingToProfile(profileRatings);
+} else {
+	// in a game, add the chess.com rating to the game
+	const lichessRatings = getLichessRatingsFromGame();
+	addChessComRatingToGame(gameType, lichessRatings);
+}
+
