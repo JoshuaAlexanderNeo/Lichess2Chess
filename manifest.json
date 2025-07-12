@@ -9,6 +9,12 @@
     "48": "images/icon.png"
   },
 
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{aa60beb9-2577-4eea-ae50-14a97ad9653d}"
+    }
+  },
+
   "content_scripts": [
     {
       "matches": ["*://lichess.org/*"],
