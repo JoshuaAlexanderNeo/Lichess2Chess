@@ -15,26 +15,23 @@ const CLASSICAL_REGRESSION = [0.00033735, 0.267304, -79.3846]
 
 // Finds out whether the game is blitz/bullet/rapid or classical
 const findGameType = () => {
-  let type = document.querySelector('.setup')
+  let type = document.querySelector('.game__meta__infos');
 
   if (type !== null) {
-    type = type.lastChild
-  } else {
-    return GAME_TYPES.UNKNOWN
-  }
-  if (type?.title && type.outerText.includes(GAME_TYPES.CORRESPONDENCE)) {
-    return GAME_TYPES.CORRESPONDENCE
-  } else if (type?.title && type.outerText.includes(GAME_TYPES.BLITZ)) {
-    return GAME_TYPES.BLITZ
-  } else if (type?.title && type.outerText.includes(GAME_TYPES.BULLET)) {
-    return GAME_TYPES.BULLET
-  } else if (type?.title && type.outerText.includes(GAME_TYPES.RAPID)) {
-    return GAME_TYPES.RAPID
-  } else if (type?.title && type.outerText.includes(GAME_TYPES.CLASSICAL)) {
-    return GAME_TYPES.CLASSICAL
-  } else {
-    return GAME_TYPES.UNKNOWN
-  }
+    const dataIcon = type.getAttribute('data-icon');
+    if (dataIcon === '') {
+        return GAME_TYPES.BLITZ;
+    } else if (dataIcon === '') {
+        return GAME_TYPES.BULLET;
+    } else if (dataIcon === '') {
+        return GAME_TYPES.RAPID;
+    } else if (dataIcon === '') {
+        return GAME_TYPES.CLASSICAL;
+    } else if (dataIcon === '') {
+        return GAME_TYPES.CORRESPONDENCE;
+    }
+  } 
+  return GAME_TYPES.UNKNOWN;
 }
 
 // Finds all both ratings in a game
@@ -66,26 +63,32 @@ const calculateRegression = (regression, lichessRating) => {
 
 // Adds ratings to the left-most sidebar.
 const addChessComRatingToProfile = (lichessRatings) => {
-  for (rating of lichessRatings) {
-    console.log(rating)
-    let regression
-    if (rating.previousElementSibling.innerHTML === GAME_TYPES.BULLET) {
-      regression = BULLET_REGRESSION
-    } else if (rating.previousElementSibling.innerHTML === GAME_TYPES.BLITZ) {
-      regression = BLITZ_REGRESSION
-    } else if (rating.previousElementSibling.innerHTML === GAME_TYPES.RAPID) {
-      regression = RAPID_REGRESSION
-    } else if (rating.previousElementSibling.innerHTML === GAME_TYPES.CLASSICAL) {
-      regression = CLASSICAL_REGRESSION
+  for (const rating of lichessRatings) {
+    let regression;
+    const link = rating.parentElement.parentElement; // This is the <a> tag
+    if (!link || link.tagName !== 'A') continue;
+    const href = link.getAttribute('href');
+
+    if (href.includes('/perf/bullet')) {
+      regression = BULLET_REGRESSION;
+    } else if (href.includes('/perf/blitz')) {
+      regression = BLITZ_REGRESSION;
+    } else if (href.includes('/perf/rapid')) {
+      regression = RAPID_REGRESSION;
+    } else if (href.includes('/perf/classical')) {
+      regression = CLASSICAL_REGRESSION;
     }
 
-    if (regression && rating.innerText[0] !== '?') {
-      const lichessRating = parseInt(rating.textContent)
-      const chessComRating = calculateRegression(regression, lichessRating)
-      let chessComRatingDiv = document.createElement('span')
-      chessComRatingDiv.style.setProperty('color', '#769656')
-      chessComRatingDiv.innerText = ` (${chessComRating})`
-      rating.firstChild.appendChild(chessComRatingDiv)
+    if (regression && !rating.textContent.includes('?')) {
+      const lichessRating = parseInt(rating.textContent);
+      if (isNaN(lichessRating)) continue;
+      const chessComRating = calculateRegression(regression, lichessRating);
+      let chessComRatingDiv = document.createElement('span');
+      chessComRatingDiv.style.setProperty('color', '#769656');
+      chessComRatingDiv.innerText = ` (${chessComRating})`;
+      if (rating.firstChild) {
+        rating.firstChild.appendChild(chessComRatingDiv);
+      }
     }
   }
 }
