@@ -23,13 +23,35 @@ https://chrome.google.com/webstore/detail/lichess2chess/mdjhjmefckhheleoegfcobij
 
 ## Regressions
 ### Bullet
-![bullet_regression](https://user-images.githubusercontent.com/89805167/173907866-57c8af0d-5985-44ea-ae53-2a1ae08a8d57.png)
+![bullet_regression](images/bullet_regression.png)
 
 ### Blitz
-![blitz_regression](https://user-images.githubusercontent.com/89805167/173907893-be119ab6-45c0-4f42-bf8c-61a5b28e187b.png)
+![blitz_regression](images/blitz_regression.png)
 
 ### Rapid
-![rapid_regression](https://user-images.githubusercontent.com/89805167/173907914-f2d1f4c7-e64e-4ef1-a27e-cec18a6167ec.png)
+![rapid_regression](images/rapid_regression.png)
 
 ### Classical
-![classical_regression](https://user-images.githubusercontent.com/89805167/173907947-b99af892-cb76-4d15-b6a5-7723f57d0558.png)
+![classical_regression](images/classical_regression.png)
+
+## Updating the Extension
+
+To update the regression data and package the extension for release, you will need to have Python 3 and `pip` installed. Then, follow these steps:
+
+1.  **Set up the virtual environment and install dependencies (only needs to be done once):**
+
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    ```
+
+2.  **Run the update script:**
+
+    ```bash
+    ./update_extension.sh
+    ```
+
+This script will automatically fetch the latest data, recalculate the regressions, update the plots in this README, and create a `Lichess2Chess.zip` file, which is ready to be uploaded to the Chrome Web Store and Firefox Add-ons.
+
+After running these commands, the `regressions.json` file will be updated with the latest data, and the extension will use the new values.

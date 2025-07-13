@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Lichess2Chess",
-  "version": "1.3",
+  "version": "1.4",
 
   "description": "Adds Chess.com rating estimate to Lichess.org.",
 
@@ -14,6 +14,11 @@
       "id": "{aa60beb9-2577-4eea-ae50-14a97ad9653d}"
     }
   },
+
+  "web_accessible_resources": [{
+    "resources": ["regressions.json"],
+    "matches": ["*://lichess.org/*"]
+  }],
 
   "content_scripts": [
     {

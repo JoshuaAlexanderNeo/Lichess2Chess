@@ -7,11 +7,20 @@ const GAME_TYPES = {
   UNKNOWN: 'Unknown'
 }
 
-// all regressions calculated from chessgoals.com on 15/06/2022
-const BLITZ_REGRESSION = [0.000169095, 0.665195, -214.973]
-const BULLET_REGRESSION = [-6.0463e-8, 0.000302882, 0.787848, -418.114]
-const RAPID_REGRESSION = [1.25804, -795.231]
-const CLASSICAL_REGRESSION = [0.00033735, 0.267304, -79.3846]
+// Fetches regression data from the local JSON file.
+const getRegressionData = async () => {
+  try {
+    const url = chrome.runtime.getURL('regressions.json');
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch regressions: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error loading regression data:", error);
+    return null;
+  }
+}
 
 // Finds out whether the game is blitz/bullet/rapid or classical
 const findGameType = () => {
@@ -45,24 +54,23 @@ const getLichessRatingsFromProfile = () => {
   return ratings
 }
 
-// Calculates the chess.com rating based on the regression
+// Calculates the chess.com rating based on the regression model
 const calculateRegression = (regression, lichessRating) => {
-  if (regression.length === 2) {
-    return Math.round(regression[0] * lichessRating + regression[1])
-  } else if (regression.length === 3) {
-    return Math.round(regression[0] * (lichessRating * lichessRating) + regression[1] * lichessRating + regression[2])
-  } else {
-    return Math.round(
-      regression[0] * (lichessRating * lichessRating * lichessRating) +
-        regression[1] * (lichessRating * lichessRating) +
-        regression[2] * lichessRating +
-        regression[3]
-    )
-  }
+    const [p1, p2, p3] = regression.params;
+    switch (regression.type) {
+        case 'linear':
+            return Math.round(p1 * lichessRating + p2);
+        case 'quadratic':
+            return Math.round(p2 * lichessRating + p1 * (lichessRating ** 2) + p3);
+        case 'log':
+            return Math.round(p1 * Math.log(lichessRating) + p2);
+        default:
+            return null;
+    }
 }
 
 // Adds ratings to the left-most sidebar.
-const addChessComRatingToProfile = (lichessRatings) => {
+const addChessComRatingToProfile = (lichessRatings, regressions) => {
   for (const rating of lichessRatings) {
     let regression;
     const link = rating.parentElement.parentElement; // This is the <a> tag
@@ -70,19 +78,20 @@ const addChessComRatingToProfile = (lichessRatings) => {
     const href = link.getAttribute('href');
 
     if (href.includes('/perf/bullet')) {
-      regression = BULLET_REGRESSION;
+      regression = regressions.BULLET;
     } else if (href.includes('/perf/blitz')) {
-      regression = BLITZ_REGRESSION;
+      regression = regressions.BLITZ;
     } else if (href.includes('/perf/rapid')) {
-      regression = RAPID_REGRESSION;
+      regression = regressions.RAPID;
     } else if (href.includes('/perf/classical')) {
-      regression = CLASSICAL_REGRESSION;
+      regression = regressions.CLASSICAL;
     }
 
     if (regression && !rating.textContent.includes('?')) {
       const lichessRating = parseInt(rating.textContent);
       if (isNaN(lichessRating)) continue;
       const chessComRating = calculateRegression(regression, lichessRating);
+      if (chessComRating === null) continue;
       let chessComRatingDiv = document.createElement('span');
       chessComRatingDiv.style.setProperty('color', '#769656');
       chessComRatingDiv.innerText = ` (${chessComRating})`;
@@ -94,22 +103,23 @@ const addChessComRatingToProfile = (lichessRatings) => {
 }
 
 // Adds the chess.com rating equivalent beside the lichess rating.
-const addChessComRatingToGame = (gameType, lichessRatings) => {
+const addChessComRatingToGame = (gameType, lichessRatings, regressions) => {
   let regression
 
   if (gameType === GAME_TYPES.BLITZ) {
-    regression = BLITZ_REGRESSION
+    regression = regressions.BLITZ
   } else if (gameType === GAME_TYPES.BULLET) {
-    regression = BULLET_REGRESSION
+    regression = regressions.BULLET
   } else if (gameType === GAME_TYPES.RAPID) {
-    regression = RAPID_REGRESSION
+    regression = regressions.RAPID
   } else {
-    regression = CLASSICAL_REGRESSION
+    regression = regressions.CLASSICAL
   }
 
   for (rating of lichessRatings) {
     const lichessRating = parseInt(rating.innerText)
     const chessComRating = calculateRegression(regression, lichessRating)
+    if (chessComRating === null) continue;
     let chessComRatingDiv = document.createElement('div')
     chessComRatingDiv.style.setProperty('color', '#769656')
     chessComRatingDiv.innerText = `(${chessComRating})`
@@ -120,13 +130,22 @@ const addChessComRatingToGame = (gameType, lichessRatings) => {
   return lichessRatings
 }
 
-const gameType = findGameType()
-if (gameType === GAME_TYPES.UNKNOWN) {
-  // check if on a profile
-  const profileRatings = getLichessRatingsFromProfile()
-  addChessComRatingToProfile(profileRatings)
-} else {
-  // in a game, add the chess.com rating to the game
-  const lichessRatings = getLichessRatingsFromGame()
-  addChessComRatingToGame(gameType, lichessRatings)
+const main = async () => {
+    const regressions = await getRegressionData();
+    if (!regressions) {
+        return;
+    }
+
+    const gameType = findGameType()
+    if (gameType === GAME_TYPES.UNKNOWN) {
+      // check if on a profile
+      const profileRatings = getLichessRatingsFromProfile()
+      addChessComRatingToProfile(profileRatings, regressions)
+    } else {
+      // in a game, add the chess.com rating to the game
+      const lichessRatings = getLichessRatingsFromGame()
+      addChessComRatingToGame(gameType, lichessRatings, regressions)
+    }
 }
+
+main();

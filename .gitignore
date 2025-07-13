@@ -1,0 +1,5 @@
+Lichess2Chess.zip
+.venv
+/.venv/
+__pycache__/
+.venv/
