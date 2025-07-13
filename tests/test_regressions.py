@@ -27,17 +27,20 @@ class TestRegressions(unittest.TestCase):
         if regression['type'] == 'linear':
             # For linear: p1 * x + p2 (JavaScript: p1 * lichessRating + p2)
             p1, p2 = params
-            return round(p1 * lichess_rating + p2)
+            result = round(p1 * lichess_rating + p2)
         elif regression['type'] == 'quadratic':
             # For quadratic: p1 * x^2 + p2 * x + p3 (JavaScript: p1 * (lichessRating ** 2) + p2 * lichessRating + p3)
             p1, p2, p3 = params
-            return round(p1 * (lichess_rating ** 2) + p2 * lichess_rating + p3)
+            result = round(p1 * (lichess_rating ** 2) + p2 * lichess_rating + p3)
         elif regression['type'] == 'log':
             # For log: p1 * log(x) + p2 (JavaScript: p1 * Math.log(lichessRating) + p2)
             p1, p2 = params
-            return round(p1 * np.log(lichess_rating) + p2)
+            result = round(p1 * np.log(lichess_rating) + p2)
         else:
             return None
+        
+        # Return 0 if the result is negative (can't have negative ratings)
+        return max(0, result)
 
     def test_blitz_regression(self):
         """Test Blitz to Blitz regression."""
@@ -466,7 +469,7 @@ class TestRegressions(unittest.TestCase):
                     calculated = self.calculate_regression_value(regression, test_rating)
                     self.assertIsNotNone(calculated, 
                                        f"{game_type} calculation failed for rating {test_rating}")
-                    self.assertGreater(calculated, 0, 
+                    self.assertGreaterEqual(calculated, 0, 
                                      f"{game_type} produced negative result for {test_rating}")
                     self.assertLess(calculated, 5000, 
                                    f"{game_type} produced unreasonably high result for {test_rating}")
@@ -502,6 +505,26 @@ class TestRegressions(unittest.TestCase):
         # The issue might be that Classical ratings are typically much higher
         # than other time controls, so the regression might not work well
         # for lower classical ratings that aren't in the training data
+
+    def test_negative_result_handling(self):
+        """Test that negative regression results are handled by returning 0."""
+        # Test with classical regression which can produce negative results for low ratings
+        df_classical = self.lichess_data[['lichess_classical', 'chess_com_blitz']].dropna()
+        regression = find_best_regression(df_classical['lichess_classical'], df_classical['chess_com_blitz'])
+        
+        # Test with a rating that would normally produce a negative result
+        low_rating = 1200  # This should produce negative result with classical regression
+        calculated = self.calculate_regression_value(regression, low_rating)
+        
+        # Should return 0 instead of negative value
+        self.assertEqual(calculated, 0, 
+                        f"Expected 0 for low classical rating {low_rating}, got {calculated}")
+        
+        # Test that higher ratings still work normally
+        high_rating = 1500
+        calculated_high = self.calculate_regression_value(regression, high_rating)
+        self.assertGreater(calculated_high, 0, 
+                          f"Higher rating {high_rating} should produce positive result")
 
 if __name__ == '__main__':
     unittest.main()

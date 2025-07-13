@@ -57,16 +57,24 @@ const getLichessRatingsFromProfile = () => {
 // Calculates the chess.com rating based on the regression model
 const calculateRegression = (regression, lichessRating) => {
     const [p1, p2, p3] = regression.params;
+    let result;
+    
     switch (regression.type) {
         case 'linear':
-            return Math.round(p1 * lichessRating + p2);
+            result = Math.round(p1 * lichessRating + p2);
+            break;
         case 'quadratic':
-            return Math.round(p2 * lichessRating + p1 * (lichessRating ** 2) + p3);
+            result = Math.round(p2 * lichessRating + p1 * (lichessRating ** 2) + p3);
+            break;
         case 'log':
-            return Math.round(p1 * Math.log(lichessRating) + p2);
+            result = Math.round(p1 * Math.log(lichessRating) + p2);
+            break;
         default:
             return null;
     }
+    
+    // Return 0 if the result is negative (can't have negative ratings)
+    return Math.max(0, result);
 }
 
 // Adds ratings to the left-most sidebar.
