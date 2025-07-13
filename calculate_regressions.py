@@ -23,7 +23,7 @@ def find_best_regression(x, y):
     models['linear'] = {
         'model': linear_model,
         'aic': calculate_aic(len(x), linear_mse, 2),
-        'params': linear_model.coef_.tolist() + [linear_model.intercept_]
+        'params': [linear_model.coef_[0], linear_model.intercept_] # [linear_coef, intercept]
     }
 
     # Quadratic
@@ -32,13 +32,10 @@ def find_best_regression(x, y):
     quad_model = LinearRegression()
     quad_model.fit(x_poly, y)
     quad_mse = mean_squared_error(y, quad_model.predict(x_poly))
-    
-    # Corrected order for quadratic parameters: [coef_x_squared, coef_x, intercept]
-    # Based on observed quad_model.coef_ shape (3,) where coef_[0] is for constant, coef_[1] for x, coef_[2] for x^2
     models['quadratic'] = {
         'model': quad_model,
         'aic': calculate_aic(len(x), quad_mse, 3),
-        'params': [quad_model.coef_[2], quad_model.coef_[1], quad_model.intercept_]
+        'params': [quad_model.coef_[2], quad_model.coef_[1], quad_model.intercept_] # [quadratic, linear, constant]
     }
 
     # Logarithmic
@@ -49,7 +46,7 @@ def find_best_regression(x, y):
     models['log'] = {
         'model': log_model,
         'aic': calculate_aic(len(x), log_mse, 2),
-        'params': log_model.coef_.tolist() + [log_model.intercept_]
+        'params': [log_model.coef_[0], log_model.intercept_] # [log_coef, intercept]
     }
 
     # Find best model

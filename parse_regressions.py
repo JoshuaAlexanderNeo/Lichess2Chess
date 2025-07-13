@@ -27,7 +27,8 @@ def main():
     try:
         response = session.get(url)
         # Render JavaScript to load dynamic content and tables
-        response.html.render(timeout=30, sleep=5) # Increased timeout and added sleep
+        # Wait for the first pagination select element to be present
+        response.html.render(wait_for_selector='#dt-length-0', timeout=30, sleep=5) 
         response.raise_for_status() # Raise an exception for bad status codes
     except Exception as e:
         print(f"Error fetching or rendering URL: {e}")
@@ -43,7 +44,8 @@ def main():
     """
     try:
         # Execute the script using render's script argument
-        response.html.render(script=script, timeout=30, sleep=5) # Re-render after changing pagination
+        # Wait for the second pagination select element to be present before executing script
+        response.html.render(script=script, wait_for_selector='#dt-length-1', timeout=30, sleep=5) 
     except Exception as e:
         print(f"Error executing JavaScript or re-rendering after pagination change: {e}")
         sys.exit(1)

@@ -20,6 +20,15 @@ echo "
 Generating updated plots for README..."
 python generate_plots.py
 
+# --- Run Tests ---
+echo "
+Running Playwright tests..."
+pytest tests/test_extension.py
+
+echo "
+Running Regression accuracy tests..."
+pytest tests/test_regressions.py
+
 # --- Package Extension ---
 echo "
 Zipping extension files..."
@@ -35,4 +44,4 @@ echo "
 ---------------------------------------------------"
 echo "Extension update complete!"
 echo "Lichess2Chess.zip is ready for upload."
-echo "---------------------------------------------------"
+echo "-------------------------------------------------"
